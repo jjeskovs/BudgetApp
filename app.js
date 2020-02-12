@@ -4,26 +4,52 @@ var budgetController = (function(){
 
 
 var UIController = (function(){
+
+    var DOMstrings = {
+        inputType: ".add__type",
+        inputDescription: ".add__description",
+        inputValue: ".add__value",
+        inputBtn: ".add__btn"
+    }; 
+    
     return {
         getInput: function (){
-            var type = document.querySelector("add__type").value; // this is income or expense selector. 
+            // THIS creates an object with the data we get from the input fields. 
+            return {
+                type: document.querySelector(DOMstrings.inputType).value, // this is income or expense selector. 
+                description: document.querySelector(DOMstrings.inputDescription).value,
+                value: document.querySelector(DOMstrings.inputValue).value,
+            };
+        },
 
+        // here we are exposing the DOMstrings to the other modules in the app. 
+        getDOMstrings: function(){
+            return DOMstrings;
         }
-    }
+
+    };
+
 })();
 
 
 
 
-var budgetController = (function(){
+
+
+var budgetController = (function(budgetCtrl, UICtrl){
+    //here we are receiving the exposed DOMString from UIController
+    var DOM = UICtrl.getDOMstrings();
 
     var ctrlAddItem = function (){
-
+        // 1. getting the input  from the form. 
+        var input = UICtrl.getInput();
+        console.log(input)
+        // 2. add the items to the budget controller
 
     }
 
     // here we add the event listener for the click of the button, and passing the function that process the data.
-    document.querySelector(".add__btn").addEventListener("click", ctrlAddItem)
+    document.querySelector(DOM.inputBtn).addEventListener("click", ctrlAddItem)
 
     // the code to listen for the 'Enter' key press
     document.addEventListener("keypress", function(event){
@@ -32,5 +58,5 @@ var budgetController = (function(){
         }     
     })
        
-})();
+})(budgetController, UIController);
     
