@@ -36,27 +36,38 @@ var UIController = (function(){
 
 
 
-var budgetController = (function(budgetCtrl, UICtrl){
-    //here we are receiving the exposed DOMString from UIController
-    var DOM = UICtrl.getDOMstrings();
+var controller = (function(budgetCtrl, UICtrl){
+    var setupEventListeners = function (){
+        //here we are receiving the exposed DOMString from UIController
+        var DOM = UICtrl.getDOMstrings();
 
+         // here we add the event listener for the click of the button, and passing the function that process the data.
+        document.querySelector(DOM.inputBtn).addEventListener("click", ctrlAddItem)
+
+        // the code to listen for the 'Enter' key press
+        document.addEventListener("keypress", function(event){
+            if (event.keyCode === 13 || event.which === 13) { // event.which is an older browser keyCode functionality
+                ctrlAddItem();
+            }     
+        })
+    }
+    
     var ctrlAddItem = function (){
-        // 1. getting the input  from the form. 
+        // 1. getting the input from the form. 
         var input = UICtrl.getInput();
         console.log(input)
         // 2. add the items to the budget controller
 
     }
 
-    // here we add the event listener for the click of the button, and passing the function that process the data.
-    document.querySelector(DOM.inputBtn).addEventListener("click", ctrlAddItem)
-
-    // the code to listen for the 'Enter' key press
-    document.addEventListener("keypress", function(event){
-        if (event.keyCode === 13 || event.which === 13) { // event.which is an older browser keyCode functionality
-            ctrlAddItem();
-        }     
-    })
+   return {
+       init: function (){
+           console.log("The App is running!!!");
+           setupEventListeners();
+       }
+   };
        
 })(budgetController, UIController);
     
+// this is what starts the app
+controller.init();
