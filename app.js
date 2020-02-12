@@ -1,4 +1,60 @@
 var budgetController = (function(){
+    var Expense = function(id, description, value){
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    }
+    
+    var Income = function(id, description, value){
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    };
+
+    var data = {
+        allItems: {
+            exp: [],
+            inc: []
+        },
+        totals: {
+            exp: 0,
+            inc: 0
+        }
+    };
+
+    return {
+        addItem: function (type, des, val){
+            var newItem, ID;
+            // creating a unique ID for each type 
+            if (data.allItems[type].length > 0){
+                ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
+            }else {
+                ID = 0;
+            }
+
+        
+            
+            // to create a new budget item based on the user's selection  
+            if (type === "exp"){
+                newItem = new Expense(ID, des, val)
+            } else if (type === "inc"){
+                newItem = new Income(ID, des, val)
+            };
+
+            // to add the item to an empty array. 
+            data.allItems[type].push(newItem);
+            // to make the new budget item accessible from outside 
+            return newItem;
+        },
+
+        // this is for testing purpose only, it give us access to the data object 
+        testing: function(){
+            console.log(data)
+        }
+
+    }
+
+
 
 })();
 
@@ -21,6 +77,10 @@ var UIController = (function(){
                 value: document.querySelector(DOMstrings.inputValue).value,
             };
         },
+        
+        addListItem: function(obj, type){
+            
+        }
 
         // here we are exposing the DOMstrings to the other modules in the app. 
         getDOMstrings: function(){
@@ -53,10 +113,13 @@ var controller = (function(budgetCtrl, UICtrl){
     }
     
     var ctrlAddItem = function (){
+        var input, newItem;
+        
         // 1. getting the input from the form. 
-        var input = UICtrl.getInput();
+        input = UICtrl.getInput();
         console.log(input)
         // 2. add the items to the budget controller
+        newItem = budgetController.addItem(input.type, input.description, input.value);
 
     }
 
