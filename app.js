@@ -19,7 +19,9 @@ var budgetController = (function(){
         totals: {
             exp: 0,
             inc: 0
-        }
+        },
+        budget: 0,
+        percentage: -1
     };
 
     return {
@@ -35,11 +37,12 @@ var budgetController = (function(){
         
             
             // to create a new budget item based on the user's selection  
-            if (type === "exp"){
-                newItem = new Expense(ID, des, val)
-            } else if (type === "inc"){
-                newItem = new Income(ID, des, val)
-            };
+            if (type === 'exp') {
+                newItem = new Expense(ID, des, val);
+            } else if (type === 'inc') {
+                newItem = new Income(ID, des, val);
+            }
+            
 
             // to add the item to an empty array. 
             data.allItems[type].push(newItem);
@@ -62,12 +65,12 @@ var budgetController = (function(){
 var UIController = (function(){
 
     var DOMstrings = {
-        inputType: ".add__type",
-        inputDescription: ".add__description",
-        inputValue: ".add__value",
-        inputBtn: ".add__btn",
-        incomeContainer: ".income__list",
-        expensesContainer: ".expenses__list"
+        inputType: '.add__type',
+        inputDescription: '.add__description',
+        inputValue: '.add__value',
+        inputBtn: '.add__btn',
+        incomeContainer: '.income__list',
+        expensesContainer: '.expenses__list'
     }; 
     
     return {
@@ -76,38 +79,53 @@ var UIController = (function(){
             return {
                 type: document.querySelector(DOMstrings.inputType).value, // this is income or expense selector. 
                 description: document.querySelector(DOMstrings.inputDescription).value,
-                value: document.querySelector(DOMstrings.inputValue).value,
+                value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
             };
         },
         
         addListItem: function(obj, type){
-            var html, newHTML, element;
+            var html, newHtml, element;
 
             // creating an HTML with the placeholders (hidden in the % ... %)
-            if (type === "inc"){
+            if (type === 'inc') {
                 element = DOMstrings.incomeContainer;
-
-                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
-            }else if (type === "exp"){
+                
+                html = '<div class="item clearfix" id="inc-%id%"> <div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+            } else if (type === 'exp') {
                 element = DOMstrings.expensesContainer;
-
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+                
+                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             
             // replacing the placeholders with the actual values 
-            newHTML = html.replace('%id%', obj.id),
-            newHTML = html.replace('%description%', obj.description),
-            newHTML = html.replace('%value%', obj.value),
+            newHtml = html.replace('%id%', obj.id);
+            newHtml = newHtml.replace('%description%', obj.description);
+            newHtml = newHtml.replace('%value%', obj.value, type);
             
             // placing the new HTML onto the screen. 
-            document.querySelector(element).insertAdjacentHTML('beforeend', newHTML);
+            document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
         },
 
+        clearFields: function(){
+            var fields, fieldsArr;
+            
+            // here we targeting each input field
+            fields = document.querySelectorAll(DOMstrings.inputDescription + ", " +  DOMstrings.inputValue)
+            fieldsArr = Array.prototype.slice.call(fields);
+            
+            // loops through all inputs stored in teh fieldsArr 
+            fieldsArr.forEach(function(current, index, array){
+                current.value = "";
+            });
+
+            // brings focus to description field. 
+            fieldsArr[0].focus();
+        }, 
 
         // here we are exposing the DOMstrings to the other modules in the app. 
-        getDOMstrings: function(){
+        getDOMstrings: function() {
             return DOMstrings;
-        },
+        }
 
     };
 
@@ -145,6 +163,10 @@ var controller = (function(budgetCtrl, UICtrl){
 
         // 3. add item to the screen
         UICtrl.addListItem(newItem, input.type)
+
+        // 4. Clearing input fields. 
+        UICtrl.clearFields();
+
 
     }
 
