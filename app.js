@@ -11,6 +11,16 @@ var budgetController = (function(){
         this.value = value;
     };
 
+    // we do this calculation outside of the RETURN below to keep it private. as no other parts of the app needs this functionality
+    var calculateTotal = function(){
+        var sum = 0;
+
+        data.allItems[type].forEach(function(current){
+            sum += current.value 
+        });
+        // adding the total to the data array
+        data.totals[type] = sum;
+    };
     var data = {
         allItems: {
             exp: [],
@@ -21,6 +31,7 @@ var budgetController = (function(){
             inc: 0
         },
         budget: 0,
+        // -1 means the value does not exist. simply a better way then setting it to 0
         percentage: -1
     };
 
@@ -43,23 +54,44 @@ var budgetController = (function(){
                 newItem = new Income(ID, des, val);
             }
             
-
             // to add the item to an empty array. 
             data.allItems[type].push(newItem);
             // to make the new budget item accessible from outside 
             return newItem;
         },
 
+        calculateBudget: function(){
+            // 1. calculate the total for each income and expense
+            calculateTotal("exp");
+            calculateTotal("inc");
+
+            // 2. Calculates total income - expense
+            data.budget = data.totals.inc - data.totals.exp;
+
+            //3. Calculate %
+            data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+        },
+
+        getBudget: function (){
+            return {
+                budget: data.budget, 
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+                percentage: data.percentage
+            }
+        },
+
         // this is for testing purpose only, it give us access to the data object 
         testing: function(){
             console.log(data)
         }
-
     }
 
-
-
 })();
+
+
+
+
 
 
 var UIController = (function(){
@@ -151,6 +183,20 @@ var controller = (function(budgetCtrl, UICtrl){
             }     
         })
     }
+
+    var updateBudget = function(){
+
+        // 1. calculates the budget
+        budgetCtrl.calculateBudget();
+        
+        //2. returns budget
+        var budget = budgetCtrl.getBudget()
+        // 3. Display the budget DOM
+
+        console.log(budget)
+
+    }
+
     
     var ctrlAddItem = function (){
         var input, newItem;
@@ -158,15 +204,20 @@ var controller = (function(budgetCtrl, UICtrl){
         // 1. getting the input from the form. 
         input = UICtrl.getInput();
         console.log(input)
-        // 2. add the items to the budget controller
-        newItem = budgetController.addItem(input.type, input.description, input.value);
 
-        // 3. add item to the screen
-        UICtrl.addListItem(newItem, input.type)
+        if (input.description !== "" && !isNaN(input.value) && input.value > 0){
+            // 2. add the items to the budget controller
+            newItem = budgetController.addItem(input.type, input.description, input.value);
 
-        // 4. Clearing input fields. 
-        UICtrl.clearFields();
+            // 3. add item to the screen
+            UICtrl.addListItem(newItem, input.type)
 
+            // 4. Clearing input fields. 
+            UICtrl.clearFields();
+
+            // 5. Calculating and updating the budget
+           updateBudget();
+        }
 
     }
 
