@@ -12,7 +12,7 @@ var budgetController = (function(){
     };
 
     // we do this calculation outside of the RETURN below to keep it private. as no other parts of the app needs this functionality
-    var calculateTotal = function(){
+    var calculateTotal = function(type){
         var sum = 0;
 
         data.allItems[type].forEach(function(current){
@@ -69,7 +69,13 @@ var budgetController = (function(){
             data.budget = data.totals.inc - data.totals.exp;
 
             //3. Calculate %
-            data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+
+            if (data.totals.inc > 0){
+                data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            }else {
+                data.percentage = -1;
+            }
+
         },
 
         getBudget: function (){
@@ -153,6 +159,10 @@ var UIController = (function(){
             // brings focus to description field. 
             fieldsArr[0].focus();
         }, 
+
+        displayBudget: function(object){
+            
+        }
 
         // here we are exposing the DOMstrings to the other modules in the app. 
         getDOMstrings: function() {
