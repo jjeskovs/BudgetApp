@@ -44,9 +44,7 @@ var budgetController = (function(){
             }else {
                 ID = 0;
             }
-
-        
-            
+ 
             // to create a new budget item based on the user's selection  
             if (type === 'exp') {
                 newItem = new Expense(ID, des, val);
@@ -77,7 +75,8 @@ var budgetController = (function(){
             }
 
         },
-
+        
+        // this function creates the budget object that we can use in the controller module. updateBudget step 2
         getBudget: function (){
             return {
                 budget: data.budget, 
@@ -108,7 +107,11 @@ var UIController = (function(){
         inputValue: '.add__value',
         inputBtn: '.add__btn',
         incomeContainer: '.income__list',
-        expensesContainer: '.expenses__list'
+        expensesContainer: '.expenses__list',
+        budgetLabel: '.budget__value',
+        incomeLabel: '.budget__income--value',
+        expenseLabel: '.budget__expenses--value',
+        percentageLabel: '.budget__expenses--percentage' 
     }; 
     
     return {
@@ -121,6 +124,7 @@ var UIController = (function(){
             };
         },
         
+        // obj is the object that is getting passed by controller module step 2. 
         addListItem: function(obj, type){
             var html, newHtml, element;
 
@@ -160,9 +164,18 @@ var UIController = (function(){
             fieldsArr[0].focus();
         }, 
 
-        displayBudget: function(object){
+        displayBudget: function(obj){
+            document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
+            document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
+            document.querySelector(DOMstrings.expenseLabel).textContent = obj.totalExp;
             
-        }
+
+            if(obj.percentage > 0){
+                document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage;    
+            }else {
+                document.querySelector(DOMstrings.percentageLabel).textContent = "---"
+            }
+        },
 
         // here we are exposing the DOMstrings to the other modules in the app. 
         getDOMstrings: function() {
@@ -200,22 +213,22 @@ var controller = (function(budgetCtrl, UICtrl){
         budgetCtrl.calculateBudget();
         
         //2. returns budget
-        var budget = budgetCtrl.getBudget()
-        // 3. Display the budget DOM
-
-        console.log(budget)
-
-    }
+        var budget = budgetCtrl.getBudget();
+        
+        // 3. Display the budget in the DOM
+        UICtrl.displayBudget(budget);
+    };
 
     
     var ctrlAddItem = function (){
         var input, newItem;
         
-        // 1. getting the input from the form. 
-        input = UICtrl.getInput();
-        console.log(input)
+            // 1. getting the input from the form. 
+            input = UICtrl.getInput();
+            console.log(input)
 
         if (input.description !== "" && !isNaN(input.value) && input.value > 0){
+            
             // 2. add the items to the budget controller
             newItem = budgetController.addItem(input.type, input.description, input.value);
 
@@ -234,6 +247,12 @@ var controller = (function(budgetCtrl, UICtrl){
    return {
        init: function (){
            console.log("The App is running!!!");
+           UICtrl.displayBudget({
+            budget: 0, 
+            totalInc: 0,
+            totalExp: 0,
+            percentage: -1
+           });
            setupEventListeners();
        }
    };
